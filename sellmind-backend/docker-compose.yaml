@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: sellmind-postgres
+    environment:
+      POSTGRES_DB: sellmind
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_/var/lib/postgresql/data
+    restart: unless-stopped
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: sellmind-api
+    ports:
+      - "8080:8080"
+    environment:
+      DB_URL: postgres://${DB_USER}:${DB_PASSWORD}@postgres:5432/sellmind?sslmode=disable
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
+    depends_on:
+      - postgres
+    restart: unless-stopped
+
+volumes:
+  postgres_
